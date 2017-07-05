@@ -1,4 +1,4 @@
-#Material en R
+*Material en R
 
 Acá econtrará todo el material para la introducción y el análisis de datos utilizando R. 
 
