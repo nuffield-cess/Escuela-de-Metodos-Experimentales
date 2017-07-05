@@ -1,9 +1,9 @@
-* Material en R
+*Material en R*
 
-Ac· econtrar· todo el material para la introducciÛn y el an·lisis de datos utilizando R. 
+Ac√° econtrar√° todo el material para la introducci√≥n y el an√°lisis de datos utilizando R. 
 
-**Incluye:
- - Documento informando cÛmo instalar R y RStudio 
+**Incluye:**
+ - Documento informando c√≥mo instalar R y RStudio 
  - R scripts para las clases
  - Bases de datos
  - Soluciones de ejercicios
