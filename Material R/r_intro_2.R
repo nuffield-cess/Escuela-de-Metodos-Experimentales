@@ -69,19 +69,21 @@ health$health_avg <- NULL
 # --------------------------------------------------------------------------------------------------
 # -- Ejercicio 3 
 # --- a. En e2 (de los ejercios de ayer), cambiar el nombre del vec1 a 'rate' y el vec2 a 'state'
-# --- b. Create a new variable in e2 called e3, which is the sqrt of rate, divided by the idnum 
+# --- b. Crear una nueva varible = "raíz" cuadrada de rate dividida por "idnum" 
+# --- nota: sólo las variables numéricas se puede usar en funciones matemáticas
 # --------------------------------------------------------------------------------------------------
 
 
-# REcodificar una variable continua en una categórica
+# Recodificar una variable continua en una categórica
 #---------------------------------
 summary(health$age) 			
-health$age_cat[health$age <= 32.5] <-"Group 1"
-health$age_cat[health$age > 32.5 & health$age <= 50] <- "Group 2"
-health$age_cat[health$age > 50] <-"Group 3"
+health$age_cat[health$age <= 32.5] <-"Grupo 1"
+health$age_cat[health$age > 32.5 & health$age <= 50] <- "Grupo 2"
+health$age_cat[health$age > 50] <-"Grupo 3"
 
 
-# E. Recode function within the "car" package - From continuous to continuous
+# Función de recodificación con el "car" package - de contínuo a contínuo
+#---------------------------------
 
 # install.packages("car")
 # library(car)
@@ -90,62 +92,77 @@ health$age_cat[health$age > 50] <-"Group 3"
 
 # F. Subsets of a Data Frame 
 
-# Subsets by specifying the column name:
+# Subconjuntos de datos utilizando el nombre de la columna:
 health[1:3, c("id", "gender", "smoke")]
 
-# Subsets by specifying the row ###
+# otra alternativa
+subset(health, age_cat=="Grupo 1")
+
+# otra más especificando por valores de las observaciones (filas)
 health$age
-which(health$age > 40)  # Returns indices of rows where logical statement is TRUE
-which(health$age > 40 & health$age < 50)
-which(health$age < 25 | health$age > 50)
+which(health$age > 40)  # Informa las filas (NO los valores) donde el valor lógico es TRUE 
+which(health$age > 40 & health$age < 50) # & = y
+which(health$age < 25 | health$age > 50) # | = ó
 
 sub1 <- health[which(health$age > 40), c("age","smoke")]
-sub2 <- subset(health, age > 40, select = c("age","smoke"))
+sub2 <- subset(health, age > 40, select = c("age","smoke")) #alternativa
 
 sub1 - sub2
 # ----------------------------------------------------------------------------------------------------------
-# -- Exercise 4 
-# --- Using e2, create a subset called e4 which contains only the observations with a rate between 5 and 7 
+# -- Ejercicio 4
+# --- Usando e2, crear un subconjunto llamado e4 que sólamente contiene las observaciones
+# --- con "rate" entre 5 y 7 
 # ----------------------------------------------------------------------------------------------------------
 
 
-# -------------------------------------------
-# -- V. Descriptive Statistics --
-# ------------------------------------------- 
+# -------------------------------
+# -- Estadísticas Descriptivas --
+# ------------------------------- 
 
 summary(health) 
 summary(health$age)
 
-# A. Continuous variable : age 
+# Variable contínua: age 
 mean(health$age, na.rm = TRUE)
 median(health$age, na.rm = TRUE)
 sd(health$age, na.rm = TRUE)
 quantile(health$age, na.rm = TRUE)
 
 
-# B.  Categorical variable : gender 
-table(health$gender)
-prop.table(table(health$gender))
+# Variable categórica: gender 
+table(health$gender) # Frecuencias
+prop.table(table(health$gender)) # proporciones
 
-table(health$gender, health$age_cat)  
+table(health$gender, health$age_cat)  # Frecuencias 2x2
 
-# Try it with margin.table as well 
-margin.table(table(health$gender, health$age_cat), 1)
+# Margin.table as well 
+margin.table(table(health$gender, health$age_cat), 1) # ¿por qué sale ese valor?
 margin.table(table(health$gender, health$age_cat), 2)
 
-# Question: how to find the row and column frequencies?
+#Proporciones por fila y columna 
 
 prop.table(margin.table(table(health$gender, health$age_cat), 1))
 prop.table(margin.table(table(health$gender, health$age_cat), 2))
+prop.table(table(health$gender, health$age_cat), 2)
 
-# C. Correlation 
-cor(health[5:9])
+# Correlation 
+cor(health[c("food", "smoke", "exercise", "happy", "alcohol")])
+cor.test(health$food, health$smoke)
+
+
+#graficar correlación
+plot(health$food, health$smoke)
 plot(health[5:9])
 
-# -----------------------------------------------------------------------------------
-# -- Exercise 5 
-# --- Using e2, create an appropriate set of statistics for the rate variable 
-# -----------------------------------------------------------------------------------
+library(car)
+scatterplot(health$food, health$smoke)
+
+
+
+# ----------------------------------------------------------------------------------------
+# -- Ejercicio 5 
+# --- Usando e2, crear un set apropiado de estadísticas descripticas de la variable "rate" 
+# ----------------------------------------------------------------------------------------
 
 
 # -------------------------------------------

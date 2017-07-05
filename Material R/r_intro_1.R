@@ -97,7 +97,9 @@ length(vec3)
 class(vec1)
 class(vec3)
 
-class(vec1)<-"character"  ### Se puede transformar de numérico a charater
+class(vec1)<-"character"  ### Se puede transformar de numérico a character
+class(vec1)<-"numeric"  ### y de vuelta 
+
 class(vec3)<-"numeric" ### Los characteres no-numericos no se pueden transformar a numéricos
 vec3
 
