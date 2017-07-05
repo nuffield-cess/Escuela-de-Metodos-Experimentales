@@ -1,5 +1,10 @@
-This is the material for the intro to R class
+* Material en R
 
-Install R:
+Acá econtrará todo el material para la introducción y el análisis de datos utilizando R. 
 
-https://docs.google.com/document/d/1nJ-BsDvrikO-Kb45-bAXXQQtqDzOBkDEvPaKYj4mOhQ/edit?usp=sharing
+**Incluye:
+ - Documento informando cómo instalar R y RStudio 
+ - R scripts para las clases
+ - Bases de datos
+ - Soluciones de ejercicios
+ 
