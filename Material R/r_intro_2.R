@@ -15,7 +15,7 @@ rm(list=ls())
 
 ## 
 # -------------------------------------------
-# -- IV. Dataset Manipulation--
+# --  Dataset Manipulation I --
 # -------------------------------------------  
 
 
@@ -49,7 +49,7 @@ table(is.na(health$age))
 mean(health$age)
 mean(health$age, na.rm = TRUE)
 
-# Computing Variables 
+# Creando Variables 
 #--------------------------
 
 # Nueva variable = suma de las variables de salud
@@ -165,85 +165,78 @@ scatterplot(health$food, health$smoke)
 # ----------------------------------------------------------------------------------------
 
 
-# -------------------------------------------
-# -- VI. Hypothesis Testing --
-# ------------------------------------------- 
+# --------------------------
+# -- Condiciones If/Else  --
+# --------------------------
 
-# Chi-square Test
-chisq.test(health$gender, health$age_cat)
-summary(table(health$gender, health$age_cat))
+# If Statement  - típicamente usado dentro de funciones o loops 
+x <- 9
+if (x > 10) {
+  print ("Mayor que 10")
+} else if (x == 10) {
+  print ("Igual a 10")
+} else if (x < 10 & x >= 0) {
+  print ("Entre 0 y 10")
+} else {
+  print ("Menos que 0")
+}
 
-# t-test 
-# One sample t test
-t.test(health$health_sum, mu=3)
-# Independent 2 group t test where y is numeric and x is a binary factor
-?t.test(health_sum ~ gender, data = health)
-# Paired t test
-t.test(health$food, health$smoke, paired = TRUE) 
-tResults <- t.test(health$food, health$health, paired = TRUE) 
-summary(tResults)
-tResults$statistic
-tResults['statistic']
+# If-Else Statement 
+# ifelse(test, acción if sí, acción if no)
+x <- seq(1:4)
+ifelse(x < 4, "Menos que 4", "mayor o igua a 4")
 
-# Linear Regression Model
-lm_health <- lm(health_sum ~ age + gender, data = health)
-summary(lm_health)
-par(mfrow = c(2, 2))
-plot(lm_health)
-confint(lm_health)
-
-# ANOVA 
-aov_health <- aov(health_sum ~ state + gender, data = health)
-summary(aov_health)
-
-# Generate a random sample from specific distribution 
-# n=100 from N(0,1) distribution
-rnorm(100)
-?rnorm
-# n=100 from U(0,1) distribution
-runif(100)
-?runif
-
-
-# Density for specific distribution
-par(mfrow = c(1, 1))  
-x <- seq(-4, 4, length = 100)
-y1 <- dnorm(x)
-plot(x, y1, type = "l", lwd = 2, col = "blue")
-y2 <- dnorm(x, m = 0, sd = 2)
-lines(x, y2, type = "l", lwd = 2, col = "red")
-
-
-# Cumulative distribution function : To get p-value, pnorm() function.
-pnorm(1.96)
+# Uso en bases de datos
+health$condición<- ifelse(health$health_sum == median(health$health_sum)  , "Mediana",
+                          ifelse(health$health_sum < mean(health$health_sum), "Peor", "Mejor"))
 
 
 
-# Quantile function : To get quantiles or "critical values", qnorm( ) function. 
-qnorm(0.95) # p = .05, one-tailed (upper)
-qnorm(c(0.025, 0.975)) # p = .05, two-tailed
+# ----------------------------------------------------------------------------------------
+# -- Ejercicio 6 
+# --- Usando e2, crear un ifelse statement de al menos cuatro categorías 
+# ----------------------------------------------------------------------------------------
 
 
-# ------------------------------------------------------------------------------
-# -- Exercise 6 
-# --- Using e2, create a histogram of rate with appropriate customizations
-# ------------------------------------------------------------------------------
-
-
-
-
-
-# -------------------------------------------
-# -- I. Data Management  --
-# -------------------------------------------
-
-# Remove every objects in your working environment 
-rm(list = ls())
-# remove.packages()
+# ----------------------
+#  -- Merge Datasets  --
+# ----------------------
+# Crear dos bases de datos con variables en común
+data1 <- data.frame(id = rep(1:5, 3), year = rep(2000:2002, each = 5), 
+                    group = sample(c("A", "B", "C"), 15, replace = TRUE))
 
 
 
-# UScereal is the dataset inside the MASS package
+data2 <- data.frame(id = rep(1:5, each = 4), year = rep(2000:2003, 5),
+                    score = rnorm(20, 50, 15)) 
+
+View(data1)
+View(data2)
+
+
+# Merge mediante id & year, 1:1 merge
+data_merge <- merge(data1, data2, by = c("id", "year")) ## sólo se mantienen las variables que se combinan
+View(data_merge)
+
+# Manteniendo todos los datos.
+data_merge <- merge(data1, data2, by = c("id", "year"), all = TRUE) 
+View(data_merge)
+
+# left-merge: x.all=TRUE. right-merge:y.all=TRUE
+
+
+# dplyr package
+library(dplyr)
+inner_merge <- inner_join(data1, data2, by = c("id", "year"))
+outer_merge <- full_join(data1, data2, by = c("id", "year"))
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# -----------------------------------
+# -- Dataset Manipulation II  --
+# -----------------------------------
+
+# UScereal  es una base de datos dentro del MASS package
 library(MASS)
 data(UScereal)
 head(UScereal)
@@ -289,9 +282,7 @@ UScereal %>% arrange(mfr, desc(calories))
 # --- Create a subset of mydata, which contains the 25 highest v1 scores
 # -----------------------------------------------------------------------------  
 
-
-
-# E. Reshape 
+# Reshape 
 # Make a Panel Dataset
 health <- data.frame(id = rep(1:10, each = 4, len = 40),
                      trial = rep(c(1:4), 10), 
@@ -324,37 +315,6 @@ gather(health_wide, key = trial, value = score, score.1:score.4) # can also refe
 setwd("C:/Users/Sonke.Ehret/Dropbox/CESS_Shared/Summer Schools 2017/Oxford/R_intro") 
 exercise_2 <- read.csv("Exercise 2.csv")
 
-
-
-# F. Merge Datasets 
-# Create two data with common variables
-data1 <- data.frame(id = rep(1:5, 3), year = rep(2000:2002, each = 5), 
-                    group = sample(c("A", "B", "C"), 15, replace = TRUE))
-
-
-
-data2 <- data.frame(id = rep(1:5, each = 4), year = rep(2000:2003, 5),
-                    score = rnorm(20, 50, 15)) 
-
-data1
-data2
-
-
-# Merge them by id & year, 1:1 merge
-data_merge <- merge(data1, data2, by = c("id", "year")) 
-data_merge
-
-# Extra rows from both datasets are added.
-data_merge <- merge(data1, data2, by = c("id", "year"), all = TRUE) 
-data_merge
-
-# left-merge: x.all=TRUE. right-merge:y.all=TRUE
-
-
-# dplyr package
-library(dplyr)
-inner_merge <- data1 %>% inner_join(data2, by = c("id", "year"))
-outer_merge <- data1 %>% full_join(data2, by = c("id", "year"))
 
 # -----------------------------------------------------------------------------
 # -- Exercise 3 
@@ -392,8 +352,13 @@ UScereal %>% group_by(mfr) %>% mutate(avg.cal = mean(calories), count = n())
 
 
 
+
+
+
+
+
 # -------------------------------------------
-# -- II. Functions  --
+# -- Funcciones  --
 # -------------------------------------------
 
 #  <function.name> <- function(arg1, arg2, ...) {
@@ -459,25 +424,6 @@ my_ttest(v1)
 switch(1, c("one", "two"),c("three", "four"))
 switch(2, c("one", "two"),c("three", "four"))
 
-# -------------------------------------------
-# -- III. If/Else Statements  --
-# -------------------------------------------
 
-# If Statement  - Typically used inside Functions & Loops
-x <- 9
-if (x > 10) {
-  print ("Greater than 10")
-} else if (x == 10) {
-  print ("Equal to 10")
-} else if (x < 10 & x >= 0) {
-  print ("Between 0 and 10")
-} else {
-  print ("Less than 0")
-}
-
-# If-Else Statement 
-# ifelse(test, action if yes, action if no)
-x <- seq(1:4)
-ifelse(x < 4, "less than 4", "more than equal to 4")
 
 

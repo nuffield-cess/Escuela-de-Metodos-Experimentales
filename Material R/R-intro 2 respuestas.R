@@ -53,33 +53,34 @@ mean(e2$rate)
 max(e2$rate)
 quantile(e2$rate)
 
-# ------------------------------------------------------------------------------
-# -- Exercise 6 
-# --- Using e2, create a histogram of rate with appropriate customizations
-# ------------------------------------------------------------------------------
 
-hist(e2$rate, xlab = "Rate", main = "Histogram of Rate", col = "green")
-
+# ----------------------------------------------------------------------------------------
+# -- Ejercicio 6 
+# --- Usando e2, crear un ifelse statement de al menos cuatro categorías 
+# ----------------------------------------------------------------------------------------
 
 
+e2$ifvar<-ifelse(e2$state=="IA", 1 , 
+                 ifelse(e2$rate<5 & !e2$state=="IA",2 , 
+                        ifelse(e2$rat>7 & !e2$state=="IA", 3, 
+                               ifelse(e2$idnum==6, 4, 5
+                                                  ))))
 
 
 
-# ----------------------------
 
-#  Vectors 
-v1 <- rnorm(100, 75, 15)
-v2 <- as.factor(rep(c("A", "B", "C", "D"), times = 25))
-v3 <- rnorm(100, 1, .5) 
 
-# Data Frames 
-mydata <- data.frame(v1, v2, v3)
+
 
 
 # -----------------------------------------------------------------------------
 # -- Exercise 1 
 # --- Create a subset of mydata, which contains the 25 highest v1 scores
 # -----------------------------------------------------------------------------  
+
+
+
+
 sorted <- mydata[order(-mydata$v1), ][1:25, ]
 
 fullsort<-mydata %>% arrange(desc(v1))
