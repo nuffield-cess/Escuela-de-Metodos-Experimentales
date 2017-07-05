@@ -5,10 +5,12 @@
 # Essex Nuffield Summer School 
 # -------------------------------------------
 
+setwd("~/GitHub/Winter-School")
+rm(list=ls())
 
-# -------------------------------------------
-# -------- Session 2   Data Wrangling Tools--
-# -------------------------------------------
+# ---------------------------------------------
+# -------- Intro opcional 2: Manejo de datos --
+# ---------------------------------------------
 
 
 ## 
@@ -17,20 +19,29 @@
 # -------------------------------------------  
 
 
-# A. Column (Variable) names 
+health <- read.table("Dataset.csv", sep = ";", header = TRUE)  
+View(health)
+
+
+# Nombres de columnas (variables)
+#--------------------------------
+
 names(health)
 names(health)[5:10] <- c("food", "smoke", 
                          "exercise", "happy",
                          "alcohol", "doctor")
+names(health)
+# tb se puede cambiar el numberde una variable específica
+#names(health)[names(health)=='health1'] <- "food"
 
-# renameby variable name: names(health)[names(health)=='health1'] <- "food"
 
 
+# Trabajando con datos que contienen Missing Data
+#--------------------------
 
-# B. Working with Missing Data
 health$age
 
-which(health$age == -1)
+which(health$age == -1) #Identfica el/los objectos relevantes
 health$age[which(health$age == -1 )] <- NA
 is.na(health$age)
 table(is.na(health$age))
@@ -38,28 +49,32 @@ table(is.na(health$age))
 mean(health$age)
 mean(health$age, na.rm = TRUE)
 
-# C. Computing Variables 
+# Computing Variables 
+#--------------------------
 
-# Create New Variable - Sum of the 6 health variables
-health$health_sum <- rowSums(health[5:10])
+# Nueva variable = suma de las variables de salud
+health$health_sum <- rowSums(health[,c("food", "smoke", 
+                                      "exercise", "happy",
+                                      "alcohol", "doctor")])
 
-# Alternative method
-apply(health[, 5:10], 1, sum) # variance by column: apply(health[, 5:10], 2, var)
+# método alternativo
+apply(health[, 5:10], 1, sum) # o varianza por columna: apply(health[, 5:10], 2, var)
 
-# Create Average Health Score
+# Crear media de salud
 health$health_avg <- health$health_sum / 6
 
-# Drop variable
+# liminar una variable
 health$health_avg <- NULL
 
 # --------------------------------------------------------------------------------------------------
-# -- Exercise 3 
-# --- a. In e2, rename obj1 'rate' and rename obj2 'state'
+# -- Ejercicio 3 
+# --- a. En e2 (de los ejercios de ayer), cambiar el nombre del vec1 a 'rate' y el vec2 a 'state'
 # --- b. Create a new variable in e2 called e3, which is the sqrt of rate, divided by the idnum 
 # --------------------------------------------------------------------------------------------------
 
 
-# D. Recode a Continuous Variable into a New Categorical Variable
+# REcodificar una variable continua en una categórica
+#---------------------------------
 summary(health$age) 			
 health$age_cat[health$age <= 32.5] <-"Group 1"
 health$age_cat[health$age > 32.5 & health$age <= 50] <- "Group 2"
