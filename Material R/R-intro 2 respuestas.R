@@ -1,8 +1,5 @@
 
 
-
-
-
 # -----------------------------------------------------------------------------
 # -- Soluciones a ejercicios clase opcional 2 --
 # Por supuesto que hay más de una forma de resolver estos ejercicios
@@ -71,77 +68,6 @@ e2$ifvar<-ifelse(e2$state=="IA", 1 ,
 
 
 
-
-
-# -----------------------------------------------------------------------------
-# -- Exercise 1 
-# --- Create a subset of mydata, which contains the 25 highest v1 scores
-# -----------------------------------------------------------------------------  
-
-
-
-
-sorted <- mydata[order(-mydata$v1), ][1:25, ]
-
-fullsort<-mydata %>% arrange(desc(v1))
-fullsort[1:25, ]
-# -----------------------------------------------------------------------------
-# -- Exercise 2 
-# --- Determine if the dataset below (exercise_2) is long or wide, and reshape 
-# --- the dataset using one of the methods above
-# -----------------------------------------------------------------------------
-
-
-spread(exercise_2, key = Treatment, value = Result)
-
-wide<-reshape(exercise_2, v.names = "Result", idvar = "Participant",
-        timevar = "Treatment", direction = "wide")
-
-# -----------------------------------------------------------------------------
-# -- Exercise 3 
-# --- Merge the reshaped dataset from Ex.2, and the exercise_3 dataset below
-# -----------------------------------------------------------------------------
-exercise_3 <- read.csv("Exercise 3.csv")
-#wide <- dcast(exercise_2, Participant ~ Treatment, value.var = "Result")
-merged <- merge(exercise_3, wide, by = "Participant")
-
-
-# -----------------------------------------------------------------------------
-# -- Exercise 5 
-# --- Using one of the methods above, find the average Before & After Score 
-# --- for each Gender and then each State
-# ----------------------------------------------------------------------------- 
-by(merged$Before, merged$Sex, mean)
-by(merged$After, merged$Sex, mean)
-# OR
-aggregate(merged[, c("Before", "After")], by = list(merged$State), FUN = mean)
-# OR
-apply(merged[which(merged$Sex == "Male"), c("Before", "After")], 2, mean)
-
-
-# -----------------------------------------------------------------------------
-# -- Exercise 4 
-# --- Create a function which takes the difference (After-Before) of the
-# --- merged data set (ex. 4) and reports the mean difference
-# -----------------------------------------------------------------------------
-fn_mean_dif <- function(low_bound, up_bound) {
-  diff <- up_bound - low_bound
-  return(mean(diff))
-}    
-
-fn_mean_dif(merged$Result.Before, merged$Result.After)
-
-
-# -----------------------------------------------------------------------------
-# -- Exercise 6 
-# --- Create a for loop which prints out the participants who improved their 
-# --- score by at least 5 points
-# -----------------------------------------------------------------------------
-for(i in 1:nrow(merged)) {
-  if ((merged$After[i] - merged$Before[i]) >= 5) {
-    print(merged[i, ])
-  }
-}
 
 
 

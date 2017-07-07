@@ -230,10 +230,9 @@ library(dplyr)
 inner_merge <- inner_join(data1, data2, by = c("id", "year"))
 outer_merge <- full_join(data1, data2, by = c("id", "year"))
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # -----------------------------------
-# -- Dataset Manipulation II  --
+# -- Resúmenes de datos II  --
 # -----------------------------------
 
 # UScereal  es una base de datos dentro del MASS package
@@ -241,188 +240,52 @@ library(MASS)
 data(UScereal)
 head(UScereal)
 
-# C. Selecting Cases 
-which(UScereal$mfr == 'K')  # reports indicies       
-which(UScereal$calories > 250)
-
-# Use indices to select rows w/ selected columns                                              
-UScereal[which(UScereal$mfr == 'K'), c('mfr', 'calories')]
-
-# subset function 
-subset(UScereal, calories > 250, c('mfr', 'calories'))
 
 # with dplyr, using the %>% operator
-# select rows
+
 install.packages('dplyr')
 library(dplyr)
-UScereal %>% filter(calories > 250)
 
-# select columns 
+# seleccionar  filas con características espefícicas
+filter(UScereal,calories > 250)
+
+# seleccionar colúmnas con características espefícicas
+select(UScereal, mfr, calories)
 UScereal %>% select(mfr, calories)
 
-# select rows and columns 
+
+# seleccionar por fila y columna 
 UScereal %>% filter(calories > 250) %>% select(mfr, calories)
 
-# D. Sorting Data 
-sort(UScereal$calories)  
-sort(UScereal)  # sort() only works for vectors
 
-order(UScereal$calories)  
-UScereal[order(UScereal$calories), c('mfr', 'calories')] 
+# Función apply y ddply,  y estadísticas agregadas
+# ------------------------------------------------
 
-UScereal[order(UScereal$mfr, -UScereal$calories), ]
+# Apply promedio mean() de variables numéricas en la base de datos      
+apply(UScereal[, c(2:8, 9)], MARGIN = 1, FUN = mean)  # Por fila
+apply(UScereal[, c(2:8, 9)], MARGIN = 2, FUN = mean) # Por columna
 
-# with dplyr
-library(dplyr)
-UScereal %>% arrange(mfr, desc(calories)) 
-
-
-# -----------------------------------------------------------------------------
-# -- Exercise 1 
-# --- Create a subset of mydata, which contains the 25 highest v1 scores
-# -----------------------------------------------------------------------------  
-
-# Reshape 
-# Make a Panel Dataset
-health <- data.frame(id = rep(1:10, each = 4, len = 40),
-                     trial = rep(c(1:4), 10), 
-                     score = rnorm(40, 3, .75))
-health[1:5, ]
-
-# Reshape : Long --> Wide
-health_wide <- reshape(health, v.names = "score", idvar = "id", 
-                       timevar = "trial", direction = "wide") 
-health_wide[1:5, ]
-head(reshape(health_wide)) # to go back to long format
-
-# Reshape : Wide --> Long
-health_long <- reshape(health_wide, idvar = "id", direction = "long")         
-health_long[1:5, ] 
-
-# Using the tidyr package
-# install.packages('tidyr')
-library(tidyr)
-spread(health, key = trial, value = score) # key is the identifier
-gather(health_wide, key = trial, value = score, score.1:score.4) # can also reference by column number(2:5)
-
-
-# -----------------------------------------------------------------------------
-# -- Exercise 2 
-# --- Determine if the dataset below (exercise2) is long or wide, and reshape 
-# --- the dataset using one of the methods above
-# -----------------------------------------------------------------------------
-# setwd to the Data Management folder
-setwd("C:/Users/Sonke.Ehret/Dropbox/CESS_Shared/Summer Schools 2017/Oxford/R_intro") 
-exercise_2 <- read.csv("Exercise 2.csv")
-
-
-# -----------------------------------------------------------------------------
-# -- Exercise 3 
-# --- Merge the reshaped dataset from Ex.2, and the exercise_3 dataset below
-# -----------------------------------------------------------------------------
-exercise_3 <- read.csv("Exercise 3.csv")
-
-
-
-# G. Apply function and Aggregate Statistics 
-# Apply mean() across numeric nutrition variables in the UScereal dataset     
-apply(UScereal[, c(2:8, 9)], MARGIN = 1, FUN = mean)  
-apply(UScereal[, c(2:8, 9)], MARGIN = 2, FUN = mean)
-
-# Apply sd() across numeric nutrition variables in the UScereal dataset      
-lapply(UScereal[, c(2:8, 9)],sd)
+# Apply  desviación estandar sd() a lo largo de todas las varibles nutricionales numéricas en la base de datos          
 sapply(UScereal[, c(2:8, 9)], sd)
-
-# tapply() instead of by factors : return an array.
-tapply(UScereal$calories, UScereal$mfr, summary)
-
-# Summary statistics of 'cty' grouped by 'trans'            
-by(UScereal$calories, UScereal$mfr, summary)
-by(UScereal$calories, list(UScereal$mfr, UScereal$shelf), summary) 
 
 # dplyr 
 library(dplyr)
+
 UScereal %>% group_by(mfr) %>% summarize(avg.cal = mean(calories))
 
-UScereal %>% group_by(mfr) %>% summarize(avg.cal = mean(calories), count = n())
-
-UScereal %>% group_by(mfr) %>% mutate(avg.cal = mean(calories), count = n())
-
-#mutate(UScereal,avg.cal = mean(UScereal$calories))
-
+library(plyr)
+ddply(UScereal, "mfr", summarise,
+      avg.cal = mean(calories)
+)
 
 
-
-
-
-
-
-# -------------------------------------------
-# -- Funcciones  --
-# -------------------------------------------
-
-#  <function.name> <- function(arg1, arg2, ...) {
-#                     function_body
-#                     return(any_value_to_return)
-#                   }
-
-# Create your own functions
-addTwoNums <- function(a, b) {
-  tmp <- a + b
-  return(tmp)
-  # Alternatively either of the below would substitue for the above
-  # return(a + b)
-  # a + b
-}
-
-addTwoNums(2, 1)
-addTwoNums(5)  # Does it work? 
-
-addTwoNums <- function(a, b = 2) {
-  return(a + b)
-}
-
-addTwoNums(5)
-addTwoNums(a = c(4, 10, 0))  # Multiple arguments at the same time
-addTwoNums(3, 4) # How does it work?
-
-# Multiple results to report 
-myOperations <- function(a, b) {
-  add <- a + b
-  subtract <- a - b
-  multiply <- a * b
-  divide <- a / b
-  mylist <- list(add, subtract, multiply, divide)
-  return(mylist)
-}
-
-myOperations(5, 10)
-
-
-# -----------------------------------------------------------------------------
-# -- Exercise 4 
-# --- Create a function which takes the difference (After-Before) of the
-# --- merged data set (ex. 4) and reports the mean difference
-# -----------------------------------------------------------------------------
+df<-ddply(UScereal, c("mfr", "vitamins"), summarise,
+                  avg.cal = mean(calories),
+                  count = length(vitamins)
+          )
 
 
 
-# A more complicated example
-# Create your own t-test function
-my_ttest <- function(x, mu = 0, test = "two-sided", alpha = 0.05) {
-  n <- length(x)
-  df <- n - 1
-  std <- sqrt(var(x))
-  t <- sqrt(n) * (mean(x) - mu) / std  
-  tail_area <- switch(test, "two-sided" = 2 * (1 - pt(abs(t), n - 1)),
-                      lower = pt(abs(t), df), upper = 1 - pt(abs(t), df))
-  list(t.statistics = t, degree.freedom = df, p.value = tail_area)
-}
-
-my_ttest(v1)
-
-switch(1, c("one", "two"),c("three", "four"))
-switch(2, c("one", "two"),c("three", "four"))
 
 
 
