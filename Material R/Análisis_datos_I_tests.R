@@ -1,26 +1,24 @@
 
 
-##########################################
-## Paper: Cheating is a national Pastime?
-## Author code: Denise Laroze
-## Year: 2017
-##########################################
+#################################################
+# Análisis de datos usando R
+# Profesora: Denise Laroze
+# Escuela de Métodos Experimentales CESS-Santiago
+#################################################
 
 
 
 library(foreign)
 library(ggplot2)
 library(readstata13)
-library(RColorBrewer)
 library(rms)
 theme_set(theme_bw())
 library(plyr)
 library(stargazer)
-library(gridExtra)
-library(clusterSEs)
 library(car)
 library(sandwich)
-
+#library(plm)
+library(texreg)
 
 rm(list=ls())
 
@@ -32,22 +30,20 @@ v<-"07Jul2017"
 dat <- read.csv("cheating_escuela_metodos.csv")
 
 
-####################
-### Subsets of data
-####################
+##########################
+### Subconjuntos de datos 
+##########################
 
 dat.2<-dat[dat$auditrate==0, ]
-dat.2<-dat.2[dat.2$treatment_lab!="Redistribution",]
+dat.2<-dat.2[dat.2$treatment_lab!="Redistribution",] # Elinimar un tratamiento por pocas observaciones
 
-####  Baseline Russia
-dat.2$country <- factor(dat.2$country, levels = c("Russia", "UK", "Chile"))
-
+####  Por país
 uk<-subset(dat.2,  country=="UK")
 cl<-subset(dat.2,  country=="Chile")
 ru<-subset(dat.2,  country=="Russia")
 
 
-### Subsets of data by treatment
+### Por tratamiento y país
 baseline.uk<-subset(dat.2, treatment_lab=="Baseline" & country=="UK")
 baseline.cl<-subset(dat.2, treatment_lab=="Baseline" & country=="Chile")
 baseline.ru<-subset(dat.2, treatment_lab=="Baseline"  & country=="Russia")
@@ -83,7 +79,7 @@ N.Subjects
 N.Session <-length(unique(dat.2$session))
 N.Session
 
-# By country
+# por país
 cdata <- ddply(dat.2, c("country"), summarise,
                N.Subjects    = length(unique(subj_id)),
                N.Session = length(unique(session))
@@ -92,7 +88,7 @@ cdata <- ddply(dat.2, c("country"), summarise,
 xtable(cdata)
 
 
-# Treatments and sessions
+# tratamientos y número de sesiones
 cdata <- ddply(dat.2, c("treatment_lab", "country"), summarise,
                N.Gender    =  length(unique(subj_id)),
                N.Session = length(unique(session))
@@ -129,23 +125,29 @@ t.test(dat.2$cheat, mu=0.5)
 t.test(cheat ~ gender, data = dat.2)
 
 # Paired t test
-t.test(health$food, health$smoke, paired = TRUE) 
-tResults <- t.test(health$food, health$health, paired = TRUE) 
+mean(dat$realdie, na.rm=T) # Con dado real
+mean(dat$digitaldie, na.rm=T) # Con dado digital
+t.test(dat$realdie, dat$digitaldie, paired = TRUE) 
+
+tResults <- t.test(dat$realdie, dat$digitaldie, paired = TRUE) 
 summary(tResults)
 tResults$statistic
 tResults['statistic']
 
 
 # ANOVA 
-aov_health <- aov(health_sum ~ state + gender, data = health)
-summary(aov_health)
+aov <- aov(percevaded ~ ncorrectret + cost_comply, data = dat.2)
+summary(aov)
 
 
-####################################
-#### Country level comparisons
-#####################################
 
-####### 0% Percent Audit
+############################
+#### Regresiones lineales
+############################
+
+####### Comparación entre países con 0% audit
+
+# Todos los países juntos
 m.all<- lm(formula = percevaded ~ ncorrectret + cost_comply,# + ideology + gender + age_subject, 
             data=dat.2)
 summary(m.all)
@@ -154,40 +156,45 @@ par(mfrow = c(2, 2))
 plot(m.all)
 confint(m.all)
 
-
-
-
+#Corrección de hetersckedasticidad
 m.all.r<-coeftest(m.all,vcovHC(m.all))
 m.all.r
 
+# UK
+m.uk<- lm(formula = percevaded ~ ncorrectret + cost_comply,# + ideology + gender + age_subject, 
+               data=uk)
+m.uk.r <- coeftest(m.uk,vcovHC(m.uk))
 
 
+# Chile
+m.cl<- lm(formula = percevaded ~ ncorrectret + cost_comply,# + ideology + gender + age_subject, 
+           data=cl)
+m.cl.r <- coeftest(m.cl,vcovHC(m.cl))
 
 
-m.all.int<- lrm(formula = percevaded ~ ncorrectret*country + cost_comply,# + ideology + gender + age_subject, 
-            data=dat.2, x=T, y=T)
-m.all.int.cl <- robcov(m.all.int, dat.2$subj_id)
+# Rusia
+m.ru<- lm(formula = percevaded ~ ncorrectret + cost_comply,# + ideology + gender + age_subject, 
+           data=ru)
+m.ru.r <- coeftest(m.ru,vcovHC(m.ru))
 
 
-m.uk<- lrm(formula = cheat ~ ncorrectret + cost_comply,# + ideology + gender + age_subject, 
-               data=uk, x=T, y=T)
-m.uk.cl <- robcov(m.uk, uk$subj_id)
+# Interacciones
+m.all.int<- lm(formula = percevaded ~ ncorrectret*country + cost_comply,# + ideology + gender + age_subject, 
+               data=dat.2)
+m.all.int.r <- coeftest(m.all.int,vcovHC(m.all.int))
 
+#### Exportar datos
+# solo ver la tabla
+stargazer(m.all.r,  m.uk.r, m.cl.r, m.ru.r, m.all.int.r,
+          order=c(1,5,6,2,3, 4))
 
-m.cl<- lrm(formula = cheat ~ ncorrectret + cost_comply,# + ideology + gender + age_subject, 
-           data=cl, x=T, y=T)
-m.cl.cl <- robcov(m.cl, cl$subj_id)
+# html para copiar a word
+stargazer(m.all.r,  m.uk.r, m.cl.r, m.ru.r, m.all.int.r,
+          order=c(1,5,6,2,3, 4), 
+          type = "html", out="Tables/interaction.html")
 
-
-m.ru<- lrm(formula = cheat ~ ncorrectret + cost_comply,# + ideology + gender + age_subject, 
-           data=ru, x=T, y=T)
-m.ru.cl <- robcov(m.ru, ru$subj_id)
-
-stargazer(m.all.cl, m.all.int, m.uk.cl, m.cl.cl, m.ru.cl,
-          order=c(1,5,6,2,3, 4),
-          type = "html", out="interaction.html")
-
-stargazer(m.all.cl, m.all.int, m.uk.cl, m.cl.cl, m.ru.cl,
+# exportar a latex
+stargazer(m.all.r,  m.uk.r, m.cl.r, m.ru.r, m.all.int.r,
           dep.var.labels.include = F,
           covariate.labels=c("\\# of Additions", 
                              "\\# of Additions*UK", "\\# of Additions*Chile","UK", "Chile", 
@@ -196,7 +203,7 @@ stargazer(m.all.cl, m.all.int, m.uk.cl, m.cl.cl, m.ru.cl,
           order=c(1,5,6,2,3, 4),
           keep.stat = c("n"),
           #add.lines=list(c("AIC", m.all.aic, m.inter.aic, m.bs.aic, m.st.full.aic, m.sh.full.aic, m.red.aic, m.nf.aic )),
-          add.lines = list(c("Countries", "All", "All", "UK", "Chile", "Russia")),
+          add.lines = list(c("Countries", "All",  "UK", "Chile", "Russia", "All")),
           model.numbers = T,
           dep.var.caption = "",
           #star.char = c("", "", ""),
@@ -205,74 +212,102 @@ stargazer(m.all.cl, m.all.int, m.uk.cl, m.cl.cl, m.ru.cl,
 
 
 #############################
-### Analysis by treatment
+### Interacciones
 #############################
 
-m.b<- lrm(formula = cheat ~ ncorrectret + cost_comply,# + ideology + gender + age_subject, 
-            data=dat.2[dat.2$treatment_lab=="Baseline",], x=T, y=T)
-m.b.cl <- robcov(m.b, dat.2$subj_id[dat.2$treatment_lab=="Baseline"])
-
-m.b.c<- lrm(formula = cheat ~ ncorrectret*country + cost_comply ,# + ideology + gender + age_subject, 
-          data=dat.2[dat.2$treatment_lab=="Baseline",], x=T, y=T)
-m.b.c.cl <- robcov(m.b.c, dat.2$subj_id[dat.2$treatment_lab=="Baseline"])
-
 #joint significance test
-m.b.c2<- glm(formula = cheat ~ ncorrectret + ncorrectret:country + cost_comply ,# + ideology + gender + age_subject, 
-             data=dat.2[dat.2$treatment_lab=="Baseline",], family=binomial(link = "logit"))
-linearHypothesis(m.b.c2, "ncorrectret + ncorrectret:countryUK")
-linearHypothesis(m.b.c2, "ncorrectret + ncorrectret:countryChile")
-#
+int<- lm(percevaded ~ ncorrectret*country + cost_comply,# + ideology + gender + age_subject, 
+             data=dat.2)
+# Otra alternativa para visualizar resultados
+plotreg(int)
+
+# Joint hypothesis test
+linearHypothesis(int, "ncorrectret + ncorrectret:countryUK")
+linearHypothesis(int, "ncorrectret + ncorrectret:countryRussia")
+
+# Visualización de interacciones
+ggplot(dat.2, aes(x = ncorrectret , y=percevaded , group = country, color = country)) + 
+  geom_point() +
+  geom_smooth(method = lm, se=T) +
+  xlab("N correct RET ") +
+  ylab(" % evaded")
+
+## Otra alternativa para visualizar interacciones
+library(effects)
+eff_cf <- effect("ncorrectret*country", int)
+print(plot(eff_cf, multiline=F))
+print(plot(eff_cf, multiline=T))
+
+########################
+### Análisis de panel
+########################
+library(plm)
 
 
-m.st<- lrm(formula = cheat ~ ncorrectret + cost_comply,# + ideology + gender + age_subject, 
-          data=dat.2[dat.2$treatment_lab=="Status",], x=T, y=T)
-m.st.cl <- robcov(m.st, dat.2$subj_id[dat.2$treatment_lab=="Status"])
+summary(lm(percevaded ~ ncorrectret + cost_comply, dat.2)
+)
 
-m.st.c<- lrm(formula = cheat ~  ncorrectret*country + cost_comply,# + ideology + gender + age_subject, 
-            data=dat.2[dat.2$treatment_lab=="Status",], x=T, y=T)
-m.st.c.cl <- robcov(m.st.c, dat.2$subj_id[dat.2$treatment_lab=="Status"])
+# equivalente a una regression lineal simple
+summary(plm(percevaded ~ ncorrectret + cost_comply, dat.2, 
+            effect = c("individual"),
+            model = c("pooling"),
+            index = c("period","subj_id"))
+)
 
-
-m.sh<- lrm(formula = cheat ~ ncorrectret + cost_comply,# + ideology + gender + age_subject, 
-          data=dat.2[dat.2$treatment_lab=="Shock",], x=T, y=T)
-m.sh.cl <- robcov(m.sh, dat.2$subj_id[dat.2$treatment_lab=="Shock"])
-
-m.sh.c<- lrm(formula = cheat ~  ncorrectret*country + cost_comply,# + ideology + gender + age_subject, 
-            data=dat.2[dat.2$treatment_lab=="Shock",], x=T, y=T)
-m.sh.c.cl <- robcov(m.sh.c, dat.2$subj_id[dat.2$treatment_lab=="Shock"])
-
-
-m.nf<- lrm(formula = cheat ~ ncorrectret + cost_comply,# + ideology + gender + age_subject, 
-           data=dat.2[dat.2$treatment_lab=="Non-fixed",], x=T, y=T)
-m.nf.cl <- robcov(m.nf, dat.2$subj_id[dat.2$treatment_lab=="Non-fixed"])
-
-m.nf.c<- lrm(formula = cheat ~  ncorrectret*country + cost_comply,# + ideology + gender + age_subject, 
-             data=dat.2[dat.2$treatment_lab=="Non-fixed",], x=T, y=T)
-m.nf.c.cl <- robcov(m.nf.c, dat.2$subj_id[dat.2$treatment_lab=="Non-fixed"])
+## Individual fixed effects
+summary(plm(percevaded ~ ncorrectret + cost_comply, dat.2, 
+    effect = c("individual"),
+    model = c("within"),
+    index = c("period","subj_id"))
+)
 
 
+## Time fixed effects
+summary(plm(percevaded ~ ncorrectret + cost_comply, dat.2, 
+            effect = c("time"),
+            model = c("within"),
+            index = c("period","subj_id"))
+)
 
 
-stargazer(m.b.cl, m.b.c.cl, m.st.cl, m.st.c.cl, m.sh.cl, m.sh.c.cl, m.nf.cl, m.nf.c.cl)
+# twoway fixed effect
+summary(plm(percevaded ~ ncorrectret + cost_comply, dat.2, 
+            effect = c("twoways"),
+            model = c("within"),
+            index = c("period","subj_id"))
+)
+
+# Random effect
+summary(plm(percevaded ~ ncorrectret + cost_comply, dat.2, 
+            model = c("random"), 
+            index = c("period","subj_id"))
+)
 
 
-stargazer(m.b.cl, m.b.c.cl, m.st.cl, m.st.c.cl, m.sh.cl, m.sh.c.cl, m.nf.cl, m.nf.c.cl,
-          covariate.labels=c("\\# of Additions", 
-                             "\\# of Additions*UK", "\\# of Additions*Chile","UK", "Chile", 
-                             "Gains from Cheating",
-                             "Constant"),
-          order=c(1,5,6,2,3, 4),
-          dep.var.labels.include = F,
-          keep.stat = c("n"),
-          #add.lines=list(c("AIC", m.all.aic, m.inter.aic, m.bs.aic, m.st.full.aic, m.sh.full.aic, m.red.aic, m.nf.aic )),
-          add.lines = list(c("Countries", "All", "All", "All", "All",  "All", "All", "All", "All"),
-                           c("Treatments","Baseline","Baseline", "Status", "Status", "Shock","Shock", "Non-Fixed", "Non-Fixed")),
-          dep.var.caption = "",
-          #star.char = c("", "", ""),
-          omit.table.layout = "n",
-          out=paste0("Tables/table01_1_", v, ".tex"))
+# First Diference
+summary(plm(percevaded ~ ncorrectret + cost_comply, dat.2, 
+            effect = c("individual"),
+            model = c("fd"), 
+            index = c("period","subj_id"))
+)
 
 
+############################
+### Modelos no lineales
+############################
+
+
+?glm()
+
+# Logit
+logit<- glm(formula = cheat ~ ncorrectret + ncorrectret:country + cost_comply ,# + ideology + gender + age_subject, 
+             data=dat.2, family=binomial(link = "logit"))
+
+# Probit
+
+probit<- glm(formula = cheat ~ ncorrectret + ncorrectret:country + cost_comply ,# + ideology + gender + age_subject, 
+            data=dat.2, family=binomial(link = "probit"))
+?glm()
 
 ####################################################################################
 ### Repetir los modelos anteriores utilizando una base de datos propia.

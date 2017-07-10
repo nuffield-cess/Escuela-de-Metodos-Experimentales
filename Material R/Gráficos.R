@@ -1,8 +1,8 @@
-# -----------------------------------------------
+#################################################
 # Análisis de datos usando R: Gráficos
 # Profesora: Denise Laroze
-# Escuela de Métodos Experimentales CESS Santiago
-# -----------------------------------------------
+# Escuela de Métodos Experimentales CESS-Santiago
+#################################################
 
 rm(list=ls())
 

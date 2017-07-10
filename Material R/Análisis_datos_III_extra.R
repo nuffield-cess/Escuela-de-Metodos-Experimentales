@@ -1,9 +1,9 @@
 
-# -----------------------------------------------
+#################################################
 # Análisis de datos usando R
 # Profesora: Denise Laroze
-# Escuela de Métodos Experimentales CESS Santiago
-# -----------------------------------------------
+# Escuela de Métodos Experimentales CESS-Santiago
+#################################################-
 
 
 
