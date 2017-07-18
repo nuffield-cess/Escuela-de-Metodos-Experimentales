@@ -71,7 +71,7 @@ ggplot(plot.data, aes(x = effects, y = n)) + geom_line() +
                 limit = c(1000, 150000),
                 labels = comma) + 
   xlab("Hypothesized Effect Size") + ylab("Sample Size")
-ggsave("power_plot/power_output.pdf", width = 5, height = 4)
+#ggsave("power_output.pdf", width = 5, height = 4)
 
 ##--------#---------#---------#---------#---------#---------#---------#---------
 ## Try different powers
@@ -111,3 +111,106 @@ ggplot(plot.data, aes(x = effects, y = n)) + geom_line() + facet_wrap(~power) +
                 labels = comma) + 
   xlab("Hypothesized Effect Size") + ylab("Sample Size")
 ggsave("power_plot/multiple_siglevels.pdf", width = 7, height = 6)
+
+
+
+
+#---------------------------------------
+# Calculos de poder mediante simulación
+#---------------------------------------
+
+
+
+# Simular datos, para ello se deben seleccionar el tamaño del efecto (delta) y una distribución de residuos
+
+set.seed(5963)
+
+#Función de poder utilizando un error distribuido uniformemente [-4,4]
+power<-function (rep, esize, N) {
+  pv <- rep(NA, rep)
+  for (i in 1:rep){
+    mydata <- data.frame(samegroup=rep(c(T,F), each=N/2))
+    mydata$given <- 8 + mydata$samegroup * esize + sample(-4:4, N, replace=T)  
+    p<- wilcox.test(given ~ samegroup, data=mydata, conf.int=T)
+    pv[i]<-p$p.value
+    power<-sum(pv < 0.05)/length(pv)
+  }
+  return(power)
+  
+}
+
+# Resultado con un N fijo
+power(rep=100, esize=1.5, N=30)
+
+#Loop sobre la función variando N
+N<-seq(10, 200, 2)
+M <- length(N)
+N.power<- rep(NA, M)
+
+for (i in 1:M){
+  N.power[i] <- power(rep=100, esize=1.5, N=N[i])
+}
+
+
+#graficar datos
+plot(N.power,N/2, main="Power calculations", ylab="Number of obs in each group", xlab="Power")
+
+
+#Función de poder utilizando un error distribuido normalmente
+power.norm<-function (rep, esize, N, var) {
+  pv <- rep(NA, rep)
+  for (i in 1:rep){
+    mydata <- data.frame(samegroup=rep(c(T,F), each=N/2))
+    mydata$given <- 5.5 + mydata$samegroup * esize +rnorm(N, 0, var) 
+    p<- wilcox.test(given ~ samegroup, data=mydata, conf.int=T)
+    pv[i]<-p$p.value
+    power<-sum(pv < 0.05)/length(pv)
+  }
+  return(power)
+}
+
+
+# Variando sobre N y el tamaño del effecto, con sigma fijo 
+
+M <- length(N)
+N.power.norm<- rep(NA, M)
+
+N<-seq(10, 100, 2)
+effects <- seq(-0.7, -1.7, by = -0.2)
+
+m <- c(length(N), length(effects))
+ne.power <- matrix(NA, m[1], m[2])
+for (i in 1:(m[1])) {
+  for (j in 1:(m[2])) {
+    ne.power[i, j] <- power.norm(rep=500, esize=effects[j], N=N[i], var=2)
+    
+  }
+}
+
+
+
+
+
+# Plots of Power calculations
+
+##  Open a new default device.
+
+get( getOption( "device" ) )()
+
+##  Graficar todas las simunaciones en un mismo gráfico (2 filas 3 columnas) 
+
+par( mfrow = c( 3, 2 ) )
+plot( ne.power[,1], N/2, col = "red", main = "Effect=-0.7, sigma=2", xlim=c(0,1), ylab="Number of obs", xlab="")
+plot( ne.power[,2], N/2, col = "blue", main = "Effect=-0.9", xlim=c(0,1), ylab="", xlab="")
+plot( ne.power[,3], N/2, col = "green", main = "Effect=-1.1", xlim=c(0,1), ylab="Number of obs", xlab="")
+plot( ne.power[,4], N/2, col = "purple", main = "Effect=-1.3", xlim=c(0,1), ylab="", xlab="")
+plot( ne.power[,5], N/2, col = "springgreen4", main = "Effect=-1.5", xlim=c(0,1), ylab="Number of obs", xlab="power")
+plot( ne.power[,6], N/2, col = "grey30", main = "Effect=-1.7", xlim=c(0,1), ylab="", xlab="power")
+
+
+
+
+
+
+
+
