@@ -1,7 +1,8 @@
-# Ac· econtrar· todo el material para la Escuela de MÈtodos Experimentales
+# Ac√° econtrar√° todo el material para la Escuela de M√©todos Experimentales
 
 
 
 ## Incluye:
+ - Presentaciones 
  - Material de R 
  
