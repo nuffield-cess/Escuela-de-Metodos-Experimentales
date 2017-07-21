@@ -19,12 +19,13 @@ library(car)
 library(sandwich)
 #library(plm)
 library(texreg)
+library(ivreg)
 
 rm(list=ls())
 
 setwd("~/GitHub/Winter-School/Material R")
 fig.path <- "Figures"
-v<-"07Jul2017"
+v<-"20Jul2017"
 
 #dat<-read.csv("Masterfile_2016_Dec.csv", sep=";")
 dat <- read.csv("cheating_escuela_metodos.csv")
@@ -308,6 +309,17 @@ logit<- glm(formula = cheat ~ ncorrectret + ncorrectret:country + cost_comply ,#
 probit<- glm(formula = cheat ~ ncorrectret + ncorrectret:country + cost_comply ,# + ideology + gender + age_subject, 
             data=dat.2, family=binomial(link = "probit"))
 ?glm()
+
+
+
+######################
+### Intent to Treat
+######################
+
+
+iv<-ivreg(percevaded ~ cost_comply + ncorrectret | ncorrectret + treatment_lab + auditrate, data= dat.2)
+
+summary(iv)
 
 ####################################################################################
 ### Repetir los modelos anteriores utilizando una base de datos propia.
