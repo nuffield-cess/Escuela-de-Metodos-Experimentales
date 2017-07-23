@@ -19,7 +19,7 @@ library(car)
 library(sandwich)
 #library(plm)
 library(texreg)
-library(ivreg)
+library(AER)
 
 rm(list=ls())
 
