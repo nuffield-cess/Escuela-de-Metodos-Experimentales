@@ -10,7 +10,7 @@
 
 # Módulo 1: Análisis de Datos 
 # Módulo 2: Cálculos de Poder
-# Módulo 3: Graficos`
+# Módulo 3: Gráficos
 
 
 # ------------------------------------------------------
