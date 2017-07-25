@@ -9,21 +9,21 @@
 # -------------------------------------------
 
 
-### playing with power function
-# power.prop.test: for binary outcome
-# power.t.test: for continuous outcome
+### Jugando con la Función de Poder
+# power.prop.test: para resultados binarios
+# power.t.test: para resultados continuos 
 library(ggplot2)
 library(scales)
 
 
-# power analysis needs to specify 4 elements
-# 1: significance level
-# 2: statistical power
-# 3: effect size
-# 4: sd of data (for t-test) or mean of the control group (for prop test)
+# Para realizar análisis de poder se requiere especificar 4 elementos
+# 1: nivel de significancia
+# 2: poder estadístico
+# 3: tamaño del efecto
+# 4: desviación estándar (para t-test) o media del grupo de control (para prop test)
 
 ##--------#---------#---------#---------#---------#---------#---------#---------
-## Binary outcome example
+## Ejemplo resultado binario
 ##--------#---------#---------#---------#---------#---------#---------#---------
 base.turnout <- 0.45
 effect.size <- 0.02
@@ -33,14 +33,14 @@ power.prop.test(p1=base.turnout,p2=base.turnout+effect.size,
 
 
 ##--------#---------#---------#---------#---------#---------#---------#---------
-## similar analysis using power.t.test
+## similar usando power.t.test
 ##--------#---------#---------#---------#---------#---------#---------#---------
-sd.sample <- sqrt(base.turnout*(1-base.turnout)) # Variance of Bernoulli distribuiton: p*(1-p)
+sd.sample <- sqrt(base.turnout*(1-base.turnout)) # Varianza de la distribución de Bernoulli: p*(1-p)
 power.t.test(delta=effect.size, sd = sd.sample, sig.level = 0.05, power = 0.8)
 
 
 ##--------#---------#---------#---------#---------#---------#---------#---------
-## Draw power curve
+## Dibujar la curva de poder
 ##--------#---------#---------#---------#---------#---------#---------#---------
 # the idea is to calculate necessary sample sizes for different effect sizes
 # we don't know the true level of effect sizes, so we need to know
@@ -57,20 +57,20 @@ for (i in 1:m) {
 	power = 0.8, sig.level=0.05, alternative="one.sided")$n
 }
 
-plot(effects, n, log = "y", xlab="Hypothesized Effect Size", ylab="Sample size",  yaxt = "n", type="l", lwd=4)
+plot(effects, n, log = "y", xlab="Tamaño hipotético del efecto", ylab="Tamaño de la muestra",  yaxt = "n", type="l", lwd=4)
 axis(2, labels=FALSE,las=1)
 namelist <- c("1000","2000","5000","10000","20000","50000","100000")
 mtext(namelist, side=2, at=as.numeric(namelist),las=1,adj=1,line=1)
 
 
-## Making fancier graphics
-## ggplot example
+## Mejores gráficos
+## ggplot
 plot.data <- data.frame(effects, n)
 ggplot(plot.data, aes(x = effects, y = n)) + geom_line() + 
   scale_y_log10(breaks = c(1000, 2000, 5000, 10000, 20000, 50000, 100000), 
                 limit = c(1000, 150000),
                 labels = comma) + 
-  xlab("Hypothesized Effect Size") + ylab("Sample Size")
+  xlab("Tamaño hipotético del efecto") + ylab("Tamaño de la muestra")
 #ggsave("power_output.pdf", width = 5, height = 4)
 
 ##--------#---------#---------#---------#---------#---------#---------#---------
@@ -86,7 +86,7 @@ for(p in powers){
   n <- rep(NA, m)
   for (i in 1:m) n[i] <- power.prop.test(p1 = base.turnout, p2 = base.turnout + effects[i], 
                                          power = p, sig.level=sig, alternative="one.sided")$n
-  plot(effects, n, log = "y", xlab="Hypothesized Effect Size", ylab="Sample size",
+  plot(effects, n, log = "y", xlab="Tamaño hipotético del efecto", ylab="Tamaño de la muestra",
        main=paste("Power: ", p),  yaxt = "n", type="l", lwd=4, ylim=c(500,300000))
   axis(2, labels=FALSE,las=1)
   namelist <- c("1000","2000","5000","10000","20000","50000","100000","200000")
@@ -109,7 +109,7 @@ ggplot(plot.data, aes(x = effects, y = n)) + geom_line() + facet_wrap(~power) +
   scale_y_log10(breaks = c(1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000), 
                 limit = c(500, 300000),
                 labels = comma) + 
-  xlab("Hypothesized Effect Size") + ylab("Sample Size")
+  xlab("Tamaño hipotético del efecto") + ylab("Tamaño de la muestra")
 ggsave("power_plot/multiple_siglevels.pdf", width = 7, height = 6)
 
 
@@ -200,11 +200,11 @@ get( getOption( "device" ) )()
 ##  Graficar todas las simunaciones en un mismo gráfico (2 filas 3 columnas) 
 
 par( mfrow = c( 3, 2 ) )
-plot( ne.power[,1], N/2, col = "red", main = "Effect=-0.7, sigma=2", xlim=c(0,1), ylab="Number of obs", xlab="")
+plot( ne.power[,1], N/2, col = "red", main = "Effect=-0.7, sigma=2", xlim=c(0,1), ylab="Núm obs", xlab="")
 plot( ne.power[,2], N/2, col = "blue", main = "Effect=-0.9", xlim=c(0,1), ylab="", xlab="")
-plot( ne.power[,3], N/2, col = "green", main = "Effect=-1.1", xlim=c(0,1), ylab="Number of obs", xlab="")
+plot( ne.power[,3], N/2, col = "green", main = "Effect=-1.1", xlim=c(0,1), ylab="Núm obs", xlab="")
 plot( ne.power[,4], N/2, col = "purple", main = "Effect=-1.3", xlim=c(0,1), ylab="", xlab="")
-plot( ne.power[,5], N/2, col = "springgreen4", main = "Effect=-1.5", xlim=c(0,1), ylab="Number of obs", xlab="power")
+plot( ne.power[,5], N/2, col = "springgreen4", main = "Effect=-1.5", xlim=c(0,1), ylab="Núm obs", xlab="power")
 plot( ne.power[,6], N/2, col = "grey30", main = "Effect=-1.7", xlim=c(0,1), ylab="", xlab="power")
 
 
