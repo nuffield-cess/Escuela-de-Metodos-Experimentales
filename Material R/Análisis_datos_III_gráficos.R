@@ -12,7 +12,7 @@ library(ggplot2)
 rm(list=ls())
 setwd("~/GitHub/Winter-School/Material R")
 fig.path <- "Figures"
-v<-"07Jul2017"
+v<-"26Jul2018"
 
 #dat<-read.csv("Masterfile_2016_Dec.csv", sep=";")
 dat <- read.csv("cheating_escuela_metodos.csv")

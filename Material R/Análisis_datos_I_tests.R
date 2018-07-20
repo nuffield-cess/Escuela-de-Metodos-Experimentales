@@ -25,7 +25,7 @@ rm(list=ls())
 
 setwd("~/GitHub/Winter-School/Material R")
 fig.path <- "Figures"
-v<-"20Jul2017"
+v<-"26Jul2018"
 
 #dat<-read.csv("Masterfile_2016_Dec.csv", sep=";")
 dat <- read.csv("cheating_escuela_metodos.csv")
@@ -36,7 +36,7 @@ dat <- read.csv("cheating_escuela_metodos.csv")
 ##########################
 
 dat.2<-dat[dat$auditrate==0, ]
-dat.2<-dat.2[dat.2$treatment_lab!="Redistribution",] # Elinimar un tratamiento por pocas observaciones
+dat.2<-dat.2[dat.2$treatment_lab!="Redistribution",] # Eliminar un tratamiento por pocas observaciones
 
 ####  Por país
 uk<-subset(dat.2,  country=="UK")

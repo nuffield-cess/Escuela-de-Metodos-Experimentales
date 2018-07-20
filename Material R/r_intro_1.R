@@ -233,7 +233,7 @@ is.na(vec4)  # NA is still in the vector & only removed from the calculation
 # --------------------------------  
 
 getwd()  # Nos dice el directorio actual
-setwd("C:/Users/André Laroze/Documents/GitHub/Winter-School")  # seleccióna el directorio que se quiere utilizar 
+setwd("C:/Users/Denise Laroze P/Documents/GitHub/Winter-School")  # seleccióna el directorio que se quiere utilizar 
 dir()
 
 # Leer bases de datos con formatos .csv (comma separated values) 
